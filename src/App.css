@@ -10,7 +10,15 @@ body {
     align-items: center;
 }
 
-#clear {
+.options-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.options {
+    user-select: none;
     background-color: #f1f1f1;
     border: none;
     width: 20vh;
@@ -18,4 +26,26 @@ body {
     border-radius: 5px;
     margin-top: 10px;
     font-size: 18px;
+}
+
+.current-color {
+    width: 50px;
+    height: 50px;
+    margin-left: 20px;
+}
+
+.fixed {
+    width: 20px;
+    height: 15px;
+    margin-right: 10px;
+}
+
+.random-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.display {
+    display: flex;
 }

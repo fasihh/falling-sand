@@ -5,8 +5,10 @@ type PropsType = {
     width: number,
     height: number,
     brushMode: number,
+    randomMode: boolean,
     clear: boolean,
-    setClear: (value: React.SetStateAction<boolean>) => void
+    setClear: (value: React.SetStateAction<boolean>) => void,
+    setColor: (value: React.SetStateAction<string>) => void
 };
 type SandCell = { state: boolean, color?: string };
 const { floor, random }: Math = Math;
@@ -15,14 +17,17 @@ const FallingSand = ({
     width,
     height,
     brushMode,
+    randomMode,
     clear,
-    setClear
+    setClear,
+    setColor,
 }: PropsType): ReactNode => {
     const [cols, rows]: number[] = [width/10, height/10];
     const draggingRef = useRef<boolean>(false);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const gridRef = useRef<SandCell[][]>([] as SandCell[][]);
+    const colorRef = useRef<number>(1);
 
     const initGrid = (): void => {
         gridRef.current = Array.from({ length: cols },
@@ -32,9 +37,10 @@ const FallingSand = ({
         );
     }
 
-    function* random_color(): Generator<string> {
-        const colors: string[] = ['crimson', 'cyan', 'chartreuse', 'darkorange', 'deepskyblue', 'forestgreen', 'salmon', 'skyblue', 'seagreen'];
-        while (true) yield colors[floor(random() * colors.length)];
+    const generate_color = (): string => {
+        if (colorRef.current > 360) colorRef.current = 1;
+        if (randomMode) colorRef.current++;
+        return `hsl(${colorRef.current}, 100%, 50%)`;
     }
     
     const handleClick = (e: PointerEvent) => {
@@ -45,9 +51,8 @@ const FallingSand = ({
             { x: 0, y: 0 }
         ];
 
-        if (brushMode == 1)
-            dirs = [ 
-                ...dirs,
+        if (brushMode === 1)
+            dirs.push(
                 ...[{ x: 1, y: 0 },
                 { x: -1, y: 0 },
                 { x: 0, y: 1 },
@@ -56,9 +61,10 @@ const FallingSand = ({
                 { x: 1, y: -1 },
                 { x: -1, y: 1 },
                 { x: -1, y: -1 }]
-            ];
+            );
 
-        const color: string = random_color().next().value;
+        const color: string = generate_color();
+        setColor(color);
         for (let dir of dirs) {
             if (dir.x + x < 0 || dir.x + x > cols-1 || dir.y + y < 0 || dir.y + y > rows-1) continue;
             gridRef.current[y + dir.y][x + dir.x] = {
@@ -113,9 +119,9 @@ const FallingSand = ({
                     continue;
                 }
 
-                if (j === cols-1 && i < rows-1 && !gridRef.current[i+1][j-1])
-                    move(1, -1)
-                else if (j === 0 && i < rows - 1 && !gridRef.current[i+1][j+1])
+                if (j === cols-1 && i < rows-1 && stateInv(gridRef.current[i+1][j-1]))
+                    move(1, -1);
+                if (j === 0 && i < rows-1 && stateInv(gridRef.current[i+1][j+1]))
                     move(1, 1);
             }
         }
@@ -161,7 +167,7 @@ const FallingSand = ({
             canvas.removeEventListener('mouseup', handleMouseUp);
             canvas.removeEventListener('mousemove', handleMouseMove);
         }
-    }, [height, width, clear]);
+    }, [height, width, clear, brushMode, randomMode]);
 
     return (
         <canvas
