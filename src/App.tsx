@@ -6,6 +6,7 @@ function App(): ReactNode {
     const [clear, setClear] = useState<boolean>(false);
     const [brushMode, setBrushMode] = useState<number>(1);
     const [randomMode, setRandomMode] = useState<boolean>(true);
+    const [freezeMode, setFreezeMode] = useState<boolean>(false);
     const [color, setColor] = useState<string>('');
 
     // add button that changes the brushMode
@@ -25,6 +26,7 @@ function App(): ReactNode {
                     height={600}
                     brushMode={brushMode}
                     randomMode={randomMode}
+                    freezeMode={freezeMode}
                     clear={clear}
                     setClear={setClear}
                     setColor={setColor}
@@ -51,6 +53,12 @@ function App(): ReactNode {
                         </div>
                     }
 
+                </button>
+                <button
+                    onClick={ () => setFreezeMode(prev => !prev) }
+                    className="options"
+                >
+                    { freezeMode ? 'Unfreeze' : 'Freeze' }
                 </button>
                 <button
                     onClick={ () => setBrushMode(bushModeCycler()) }

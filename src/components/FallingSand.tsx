@@ -6,6 +6,7 @@ type PropsType = {
     height: number,
     brushMode: number,
     randomMode: boolean,
+    freezeMode: boolean,
     clear: boolean,
     setClear: (value: React.SetStateAction<boolean>) => void,
     setColor: (value: React.SetStateAction<string>) => void
@@ -18,6 +19,7 @@ const FallingSand = ({
     height,
     brushMode,
     randomMode,
+    freezeMode,
     clear,
     setClear,
     setColor,
@@ -139,7 +141,8 @@ const FallingSand = ({
         let reqFrame: number = 0;
         const render = (): void => {
             reqFrame = window.requestAnimationFrame(render);
-            update();
+            if (!freezeMode)
+                update();
             draw();
         }
         reqFrame = window.requestAnimationFrame(render);
@@ -167,7 +170,7 @@ const FallingSand = ({
             canvas.removeEventListener('mouseup', handleMouseUp);
             canvas.removeEventListener('mousemove', handleMouseMove);
         }
-    }, [height, width, clear, brushMode, randomMode]);
+    }, [height, width, clear, brushMode, randomMode, freezeMode]);
 
     return (
         <canvas
