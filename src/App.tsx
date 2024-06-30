@@ -4,7 +4,7 @@ import FallingSand from './components/FallingSand';
 
 function App(): ReactNode {
     return (
-        <FallingSand width={1920} height={1050} />
+        <FallingSand width={500} height={500} />
     );
 }
 
