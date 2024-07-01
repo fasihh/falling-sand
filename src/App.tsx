@@ -10,6 +10,7 @@ function App(): ReactNode {
     const [eraseMode, setEraseMode] = useState<boolean>(false);
     const [color, setColor] = useState<number>(1);
     const [save, setSave] = useState<boolean>(false);
+    const [pixelSize, setPixelSize] = useState<number>(2);
 
     // add button that changes the brushMode
     function bushModeCycler(): number {
@@ -24,13 +25,23 @@ function App(): ReactNode {
         }
     }
 
+    function pixelSizeCycler(): number {
+        switch (pixelSize) {
+            case 2: return 5;
+            case 5: return 10;
+            case 10: return 20;
+            case 20: return 2;
+            default: return 0;
+        }
+    }
+
     return (
         <div className='container'>
             <div className='display'>
                 <FallingSand
                     width={800}
                     height={600}
-                    pixelSize={2}
+                    pixelSize={pixelSize}
                     brushMode={brushMode}
                     randomMode={randomMode}
                     freezeMode={freezeMode}
@@ -90,6 +101,12 @@ function App(): ReactNode {
                     className="options"
                 >
                     Export
+                </button>
+                <button
+                    onClick={ () => setPixelSize(pixelSizeCycler()) }
+                    className="options"
+                >
+                    Pixel Size {pixelSize}
                 </button>
             </div>
         </div>

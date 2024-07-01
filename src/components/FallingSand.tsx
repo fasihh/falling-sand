@@ -39,6 +39,7 @@ const FallingSand = ({
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const gridRef = useRef<SandCell[][]>([] as SandCell[][]);
     const colorRef = useRef<number>(1);
+    const previousPixelSize = useRef<number>(pixelSize);
 
     const generateBrushSizes = (radius: number): Position[] => {
         const brushSizes: Position[] = [];
@@ -138,9 +139,10 @@ const FallingSand = ({
     }
 
     useEffect(() => {
-        if (gridRef.current.length === 0 || clear) {
+        if (gridRef.current.length === 0 || clear || previousPixelSize.current != pixelSize) {
             initGrid();
             setClear(false);
+            previousPixelSize.current = pixelSize;
         }
 
         const canvas = canvasRef.current as HTMLCanvasElement;
@@ -190,7 +192,7 @@ const FallingSand = ({
             canvas.removeEventListener('mousemove', handleMouseMove);
             canvas.removeEventListener('mouseleave', handleMouseUp);
         }
-    }, [height, width, clear, brushMode, randomMode, freezeMode, eraseMode, save]);
+    }, [height, width, clear, brushMode, randomMode, freezeMode, eraseMode, save, pixelSize]);
 
     return (
         <canvas
