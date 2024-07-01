@@ -4,32 +4,45 @@ import { ReactNode, SyntheticEvent, useEffect, useRef } from "react";
 type PropsType = {
     width: number,
     height: number,
+    pixelSize: number,
     brushMode: number,
     randomMode: boolean,
+    eraseMode: boolean,
     freezeMode: boolean,
     clear: boolean,
     setClear: (value: React.SetStateAction<boolean>) => void,
-    setColor: (value: React.SetStateAction<string>) => void
+    setColor: (value: React.SetStateAction<number>) => void
 };
 type SandCell = { state: boolean, color?: string };
+type Position = { x: number, y: number };
 const { floor, random }: Math = Math;
 
 const FallingSand = ({
     width,
     height,
+    pixelSize,
     brushMode,
     randomMode,
     freezeMode,
+    eraseMode,
     clear,
     setClear,
     setColor,
 }: PropsType): ReactNode => {
-    const [cols, rows]: number[] = [width/10, height/10];
+    const [cols, rows]: number[] = [width/pixelSize, height/pixelSize];
     const draggingRef = useRef<boolean>(false);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const gridRef = useRef<SandCell[][]>([] as SandCell[][]);
     const colorRef = useRef<number>(1);
+
+    const generateBrushSizes = (radius: number): Position[] => {
+        const brushSizes: Position[] = [];
+        for (let x = -radius; x <= radius; x++)
+            for (let y = -radius; y <= radius; y++)
+                if (x !== 0 || y !== 0) brushSizes.push({ x, y });
+        return brushSizes;
+    };
 
     const initGrid = (): void => {
         gridRef.current = Array.from({ length: cols },
@@ -41,37 +54,28 @@ const FallingSand = ({
 
     const generate_color = (): string => {
         if (colorRef.current > 360) colorRef.current = 1;
-        if (randomMode) colorRef.current++;
+        if (randomMode && !eraseMode) colorRef.current++;
         return `hsl(${colorRef.current}, 100%, 50%)`;
     }
     
     const handleClick = (e: PointerEvent) => {
         const { offsetX, offsetY }: Partial<PointerEvent> = e;
-        const [x, y]: number[] = [floor(offsetX / 10), floor(offsetY / 10)];
+        const [x, y]: number[] = [floor(offsetX/pixelSize), floor(offsetY/pixelSize)];
 
-        let dirs: { x: number, y: number }[] = [
+        let dirs: Position[] = [
             { x: 0, y: 0 }
         ];
 
-        if (brushMode === 1)
-            dirs.push(
-                ...[{ x: 1, y: 0 },
-                { x: -1, y: 0 },
-                { x: 0, y: 1 },
-                { x: 0, y: -1 },
-                { x: 1, y: 1 },
-                { x: 1, y: -1 },
-                { x: -1, y: 1 },
-                { x: -1, y: -1 }]
-            );
+        if (brushMode-1)
+            dirs.push(...generateBrushSizes(brushMode));;
 
         const color: string = generate_color();
-        setColor(color);
+        setColor(colorRef.current);
         for (let dir of dirs) {
             if (dir.x + x < 0 || dir.x + x > cols-1 || dir.y + y < 0 || dir.y + y > rows-1) continue;
             gridRef.current[y + dir.y][x + dir.x] = {
-                state: true,
-                color
+                state: !eraseMode,
+                color: eraseMode ? undefined : color 
             };
         }
     }
@@ -87,7 +91,7 @@ const FallingSand = ({
             for (let j = 0; j < cols; ++j)
                 if (!stateInv(gridRef.current[i][j])) {
                     context.fillStyle = gridRef.current[i][j]?.color as string;
-                    context.fillRect(j*10, i*10, 10, 10);
+                    context.fillRect(j*pixelSize, i*pixelSize, pixelSize, pixelSize);
                 }
     }
 
@@ -147,8 +151,9 @@ const FallingSand = ({
         }
         reqFrame = window.requestAnimationFrame(render);
 
-        const handleMouseDown = (): void => {
+        const handleMouseDown = (e: MouseEvent): void => {
             draggingRef.current = true;
+            handleClick(e as unknown as PointerEvent)
         };
 
         const handleMouseUp = (): void => {
@@ -163,14 +168,16 @@ const FallingSand = ({
         canvas.addEventListener('mousedown', handleMouseDown);
         canvas.addEventListener('mouseup', handleMouseUp);
         canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseleave', handleMouseUp);
 
         return () => {
             window.cancelAnimationFrame(reqFrame);
             canvas.removeEventListener('mousedown', handleMouseDown);
             canvas.removeEventListener('mouseup', handleMouseUp);
             canvas.removeEventListener('mousemove', handleMouseMove);
+            canvas.removeEventListener('mouseleave', handleMouseUp);
         }
-    }, [height, width, clear, brushMode, randomMode, freezeMode]);
+    }, [height, width, clear, brushMode, randomMode, freezeMode, eraseMode]);
 
     return (
         <canvas

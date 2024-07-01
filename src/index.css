@@ -8,6 +8,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #2b2d31;
   justify-content: center;
+  user-select: none;
 }
 
 code {
