@@ -9,6 +9,7 @@ function App(): ReactNode {
     const [freezeMode, setFreezeMode] = useState<boolean>(false);
     const [eraseMode, setEraseMode] = useState<boolean>(false);
     const [color, setColor] = useState<number>(1);
+    const [save, setSave] = useState<boolean>(false);
 
     // add button that changes the brushMode
     function bushModeCycler(): number {
@@ -35,8 +36,10 @@ function App(): ReactNode {
                     freezeMode={freezeMode}
                     eraseMode={eraseMode}
                     clear={clear}
+                    save={save}
                     setClear={setClear}
                     setColor={setColor}
+                    setSave={setSave}
                 />
                 <div className='current-color-wrapper'>
                     <span>Current Color</span>
@@ -81,6 +84,12 @@ function App(): ReactNode {
                     className="options"
                 >
                     { eraseMode ? 'Draw' : 'Erase' }
+                </button>
+                <button
+                    onClick={ () => setSave(true) }
+                    className="options"
+                >
+                    Export
                 </button>
             </div>
         </div>

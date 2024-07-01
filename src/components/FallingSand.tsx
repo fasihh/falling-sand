@@ -8,10 +8,12 @@ type PropsType = {
     brushMode: number,
     randomMode: boolean,
     eraseMode: boolean,
+    save: boolean,
     freezeMode: boolean,
     clear: boolean,
     setClear: (value: React.SetStateAction<boolean>) => void,
-    setColor: (value: React.SetStateAction<number>) => void
+    setColor: (value: React.SetStateAction<number>) => void,
+    setSave: (value: React.SetStateAction<boolean>) => void
 };
 type SandCell = { state: boolean, color?: string };
 type Position = { x: number, y: number };
@@ -24,10 +26,12 @@ const FallingSand = ({
     brushMode,
     randomMode,
     freezeMode,
+    save,
     eraseMode,
     clear,
     setClear,
     setColor,
+    setSave,
 }: PropsType): ReactNode => {
     const [cols, rows]: number[] = [width/pixelSize, height/pixelSize];
     const draggingRef = useRef<boolean>(false);
@@ -151,6 +155,15 @@ const FallingSand = ({
         }
         reqFrame = window.requestAnimationFrame(render);
 
+        if (save) {
+            const data = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `${reqFrame}-sand-frame.png`;
+            link.href = data;
+            link.click();
+            setSave(false);
+        }
+
         const handleMouseDown = (e: MouseEvent): void => {
             draggingRef.current = true;
             handleClick(e as unknown as PointerEvent)
@@ -177,7 +190,7 @@ const FallingSand = ({
             canvas.removeEventListener('mousemove', handleMouseMove);
             canvas.removeEventListener('mouseleave', handleMouseUp);
         }
-    }, [height, width, clear, brushMode, randomMode, freezeMode, eraseMode]);
+    }, [height, width, clear, brushMode, randomMode, freezeMode, eraseMode, save]);
 
     return (
         <canvas
